@@ -1,0 +1,11 @@
+# Robots.txt for Destination Media Services
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://destinationmediaservices.com/sitemap.xml
+
+# Disallow admin/private areas
+Disallow: /api/
+Disallow: /_next/
+Disallow: /*.json$

@@ -1,0 +1,40 @@
+{
+  "name": "Destination Media Services",
+  "short_name": "DMS",
+  "description": "Award-winning visual storytelling for luxury hotels, resorts, destination weddings, and travel brands.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F5F0E8",
+  "theme_color": "#2C2C2C",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["photography", "travel", "business"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Contact Us",
+      "short_name": "Contact",
+      "description": "Send us an inquiry",
+      "url": "/inquiry",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "View Gallery",
+      "short_name": "Gallery",
+      "description": "Browse our portfolio",
+      "url": "/gallery",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
