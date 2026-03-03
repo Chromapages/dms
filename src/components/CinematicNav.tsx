@@ -37,21 +37,26 @@ export default function CinematicNav() {
           </span>
         </Link>
 
-        {/* Desktop Nav — hidden on mobile (bottom nav handles mobile) */}
-        <div className="hidden lg:flex items-center gap-12">
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="label text-white hover:text-white transition-colors relative group"
-            >
-              {item.label}
-              <span className="absolute -bottom-1 left-0 w-0 h-px bg-[#C4A962] transition-all duration-300 group-hover:w-full" />
+        {/* Nav Actions */}
+        <div className="flex items-center gap-4 lg:gap-12">
+          {/* Desktop Links */}
+          <div className="hidden lg:flex items-center gap-12">
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="label text-white hover:text-white transition-colors relative group"
+              >
+                {item.label}
+                <span className="absolute -bottom-1 left-0 w-0 h-px bg-[#C4A962] transition-all duration-300 group-hover:w-full" />
+              </Link>
+            ))}
+            <Link href="/inquiry" className="btn-ghost text-white border-white/30 hover:border-[#C4A962]">
+              Contact
             </Link>
-          ))}
-          <Link href="/inquiry" className="btn-ghost text-white border-white/30 hover:border-[#C4A962]">
-            Contact
-          </Link>
+          </div>
+
+          {/* Theme Toggle — Visible on all screens */}
           <DarkModeToggle />
         </div>
       </div>
