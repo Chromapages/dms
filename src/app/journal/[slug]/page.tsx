@@ -1,10 +1,11 @@
-"use client";
-
 import { ArrowLeft, Calendar, Clock, Share2 } from "lucide-react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import Image from "next/image";
+import { notFound } from "next/navigation";
+import { PortableText } from "@portabletext/react";
+import { getJournalPostBySlug, getJournalPosts } from "@/lib/sanity";
 
-const posts: Record<string, {
+const fallbackPosts: Record<string, {
   title: string;
   date: string;
   readTime: string;
@@ -17,7 +18,7 @@ const posts: Record<string, {
     date: "January 15, 2026",
     readTime: "5 min read",
     category: "Technique",
-    excerpt: "Discovering the magic of light in one of the world's mostphotographed destinations.",
+    excerpt: "Discovering the magic of light in one of the world's most photographed destinations.",
     content: [
       "There's a reason photographers flock to Santorini during golden hour. The light here is unlike anywhere else on Earth—warm, diffused, and impossibly romantic.",
       "When we arrived at our location in Oia, the white-washed buildings were already catching the first hints of amber. The key is positioning yourself to capture both the buildings and the caldera beyond.",
@@ -56,73 +57,146 @@ const posts: Record<string, {
   },
 };
 
-export default function JournalPost() {
-  const params = useParams();
-  const slug = params?.slug as string;
-  const post = posts[slug];
+function formatDate(dateString: string): string {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+}
 
-  if (!post) {
+export default async function JournalPost({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+
+  const sanityPost = await getJournalPostBySlug(slug).catch(() => null);
+
+  if (sanityPost) {
+    const date = sanityPost.publishedAt ? formatDate(sanityPost.publishedAt) : '';
+
     return (
-      <div className="min-h-screen bg-stone-50 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-serif mb-4">Post not found</h1>
-          <Link href="/journal" className="text-amber-600 hover:underline">
-            Back to Journal
-          </Link>
-        </div>
+      <div className="min-h-screen bg-bg transition-colors duration-300">
+        <header className="border-b border-text-primary/10">
+          <div className="max-w-7xl mx-auto px-6 py-4">
+            <Link href="/journal" className="inline-flex items-center gap-2 text-text-secondary hover:text-text-primary transition">
+              <ArrowLeft className="w-4 h-4" /> Back to Journal
+            </Link>
+          </div>
+        </header>
+
+        <article>
+          <section className="py-20 bg-bg-elevated">
+            <div className="max-w-3xl mx-auto px-6 text-center">
+              <div className="flex items-center justify-center gap-4 text-text-secondary text-sm mb-6">
+                {date && (
+                  <span className="flex items-center gap-1">
+                    <Calendar className="w-4 h-4" />
+                    {date}
+                  </span>
+                )}
+                {sanityPost.category && (
+                  <>
+                    <span>•</span>
+                    <span className="text-accent">{sanityPost.category}</span>
+                  </>
+                )}
+              </div>
+              <h1 className="text-4xl md:text-5xl font-serif text-text-primary mb-6">{sanityPost.title}</h1>
+              {sanityPost.excerpt && (
+                <p className="text-xl text-text-secondary">{sanityPost.excerpt}</p>
+              )}
+            </div>
+          </section>
+
+          {sanityPost.image && (
+            <div className="max-w-4xl mx-auto px-6 -mt-4">
+              <div className="relative aspect-[16/9] w-full overflow-hidden">
+                <Image
+                  src={sanityPost.image}
+                  alt={sanityPost.imageAlt || sanityPost.title}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 896px) 100vw, 896px"
+                  priority
+                />
+              </div>
+            </div>
+          )}
+
+          <section className="py-20">
+            <div className="max-w-2xl mx-auto px-6">
+              {sanityPost.body ? (
+                <div className="prose prose-lg prose-neutral dark:prose-invert max-w-none">
+                  <PortableText value={sanityPost.body} />
+                </div>
+              ) : (
+                <p className="text-text-secondary">No content available.</p>
+              )}
+
+              <div className="mt-12 pt-8 border-t border-text-primary/10 flex items-center justify-between">
+                <Link href="/journal" className="text-accent hover:underline">
+                  ← More articles
+                </Link>
+                <button className="flex items-center gap-2 text-text-secondary hover:text-text-primary transition">
+                  <Share2 className="w-4 h-4" />
+                  Share
+                </button>
+              </div>
+            </div>
+          </section>
+        </article>
       </div>
     );
   }
 
+  const fallback = fallbackPosts[slug];
+
+  if (!fallback) {
+    notFound();
+  }
+
   return (
-    <div className="min-h-screen bg-stone-50">
-      <header className="bg-white border-b border-stone-200">
+    <div className="min-h-screen bg-bg transition-colors duration-300">
+      <header className="border-b border-text-primary/10">
         <div className="max-w-7xl mx-auto px-6 py-4">
-          <Link href="/journal" className="inline-flex items-center gap-2 text-stone-600 hover:text-stone-900 transition">
+          <Link href="/journal" className="inline-flex items-center gap-2 text-text-secondary hover:text-text-primary transition">
             <ArrowLeft className="w-4 h-4" /> Back to Journal
           </Link>
         </div>
       </header>
 
       <article>
-        {/* Hero */}
-        <section className="py-20 bg-stone-900 text-white">
+        <section className="py-20 bg-bg-elevated">
           <div className="max-w-3xl mx-auto px-6 text-center">
-            <div className="flex items-center justify-center gap-4 text-stone-400 text-sm mb-6">
+            <div className="flex items-center justify-center gap-4 text-text-secondary text-sm mb-6">
               <span className="flex items-center gap-1">
                 <Calendar className="w-4 h-4" />
-                {post.date}
+                {fallback.date}
               </span>
               <span>•</span>
               <span className="flex items-center gap-1">
                 <Clock className="w-4 h-4" />
-                {post.readTime}
+                {fallback.readTime}
               </span>
               <span>•</span>
-              <span className="text-amber-400">{post.category}</span>
+              <span className="text-accent">{fallback.category}</span>
             </div>
-            <h1 className="text-4xl md:text-5xl font-serif mb-6">{post.title}</h1>
-            <p className="text-xl text-stone-300">{post.excerpt}</p>
+            <h1 className="text-4xl md:text-5xl font-serif text-text-primary mb-6">{fallback.title}</h1>
+            <p className="text-xl text-text-secondary">{fallback.excerpt}</p>
           </div>
         </section>
 
-        {/* Content */}
         <section className="py-20">
           <div className="max-w-2xl mx-auto px-6">
-            <div className="prose prose-lg prose-stone">
-              {post.content.map((paragraph, i) => (
-                <p key={i} className="mb-6 text-stone-700 leading-relaxed">
+            <div className="prose prose-lg prose-neutral dark:prose-invert">
+              {fallback.content.map((paragraph, i) => (
+                <p key={i} className="mb-6 text-text-secondary leading-relaxed">
                   {paragraph}
                 </p>
               ))}
             </div>
 
-            {/* Share */}
-            <div className="mt-12 pt-8 border-t border-stone-200 flex items-center justify-between">
-              <Link href="/journal" className="text-amber-600 hover:underline">
+            <div className="mt-12 pt-8 border-t border-text-primary/10 flex items-center justify-between">
+              <Link href="/journal" className="text-accent hover:underline">
                 ← More articles
               </Link>
-              <button className="flex items-center gap-2 text-stone-500 hover:text-stone-900 transition">
+              <button className="flex items-center gap-2 text-text-secondary hover:text-text-primary transition">
                 <Share2 className="w-4 h-4" />
                 Share
               </button>
@@ -131,21 +205,20 @@ export default function JournalPost() {
         </section>
       </article>
 
-      {/* Related */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-bg-elevated">
         <div className="max-w-7xl mx-auto px-6">
-          <h2 className="text-2xl font-serif mb-8">More from the Journal</h2>
+          <h2 className="text-2xl font-serif text-text-primary mb-8">More from the Journal</h2>
           <div className="grid md:grid-cols-3 gap-8">
-            {Object.entries(posts)
+            {Object.entries(fallbackPosts)
               .filter(([s]) => s !== slug)
               .slice(0, 3)
               .map(([s, p]) => (
                 <Link key={s} href={`/journal/${s}`} className="group">
-                  <div className="aspect-video bg-gradient-to-br from-amber-100 to-stone-200 rounded-lg mb-4" />
-                  <h3 className="font-serif text-lg group-hover:text-amber-600 transition">
+                  <div className="aspect-video bg-gradient-to-br from-bg-elevated to-charcoal/30 rounded-lg mb-4" />
+                  <h3 className="font-serif text-lg text-text-primary group-hover:text-accent transition">
                     {p.title}
                   </h3>
-                  <p className="text-sm text-stone-500">{p.category}</p>
+                  <p className="text-sm text-text-secondary">{p.category}</p>
                 </Link>
               ))}
           </div>

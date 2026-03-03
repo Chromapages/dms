@@ -16,14 +16,27 @@ interface Service {
     href: string;
 }
 
-const servicesData: Service[] = [
+interface SanityService {
+    _id: string;
+    title: string;
+    tagline?: string;
+    description?: string;
+    icon?: string;
+    deliverables?: string[];
+}
+
+interface CinematicServicesProps {
+    services?: SanityService[];
+}
+
+const defaultServicesData: Service[] = [
     {
         id: 'photography',
         number: '01',
         title: 'Photography',
         shortDesc: 'Editorial-quality imagery',
         fullDesc: 'We create breathtaking editorial imagery that captures the essence of your property. From sweeping architectural wide shots to the intimate details of your culinary offerings, every frame is meticulously styled, lit, and color-graded to transport viewers immediately to your destination.',
-        image: '/hero-dms.png', // Fallback, would normally be specific images
+        image: '/hero-dms.png',
         href: '/services/photography'
     },
     {
@@ -55,7 +68,20 @@ const servicesData: Service[] = [
     }
 ];
 
-export default function CinematicServices() {
+function mapSanityServices(services: SanityService[]): Service[] {
+    return services.map((s, i) => ({
+        id: s._id,
+        number: String(i + 1).padStart(2, '0'),
+        title: s.title,
+        shortDesc: s.tagline || '',
+        fullDesc: s.description || '',
+        image: '/hero-dms.png',
+        href: `/services/${s.title.toLowerCase().replace(/\s+/g, '-')}`,
+    }));
+}
+
+export default function CinematicServices({ services }: CinematicServicesProps) {
+    const servicesData = services?.length ? mapSanityServices(services) : defaultServicesData;
     const [expandedId, setExpandedId] = useState<string>(servicesData[0].id);
 
     const toggleService = (id: string) => {

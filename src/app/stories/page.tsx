@@ -1,12 +1,26 @@
 import type { Metadata } from 'next';
 import StoriesGallery from '@/components/StoriesGallery';
+import { getStories } from '@/lib/sanity';
 
 export const metadata: Metadata = {
     title: 'Selected Stories | DMS',
     description: 'An archive of our most extraordinary commissions across luxury hospitality and destinations.',
 };
 
-export default function StoriesPage() {
+export default async function StoriesPage() {
+    const rawStories = await getStories().catch(() => []);
+
+    const stories = rawStories?.length
+        ? rawStories.map((s: { _id: string; title: string; slug: string; location: string; category: string; image: string }) => ({
+            id: s._id,
+            title: s.title,
+            slug: s.slug,
+            location: s.location || '',
+            category: s.category || '',
+            image: s.image || '/hero-dms.png',
+        }))
+        : undefined;
+
     return (
         <div className="min-h-screen bg-bg pt-32 selection:bg-accent/30 selection:text-text-primary">
             {/* Immersive Typographic Header */}
@@ -23,7 +37,7 @@ export default function StoriesPage() {
             </header>
 
             {/* Masonry Gallery with Filtering */}
-            <StoriesGallery />
+            <StoriesGallery stories={stories} />
         </div>
     );
 }

@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
-import CinematicNav from "@/components/CinematicNav";
-import CinematicFooter from "@/components/CinematicFooter";
+import LayoutChrome from "@/components/LayoutChrome";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import "./globals.css";
 
@@ -84,9 +83,9 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body suppressHydrationWarning className={`${inter.variable} ${playfair.variable} bg-bg text-text-primary transition-colors duration-300`}>
         <ThemeProvider>
-          <CinematicNav />
-          <main>{children}</main>
-          <CinematicFooter />
+          <LayoutChrome>
+            <main>{children}</main>
+          </LayoutChrome>
         </ThemeProvider>
         <script
           type="application/ld+json"

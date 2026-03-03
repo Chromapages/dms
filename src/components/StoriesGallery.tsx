@@ -5,8 +5,21 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// Mock Data representing varying aspect ratios and categories
-const storiesData = [
+interface StoryItem {
+    id: string | number;
+    title: string;
+    slug?: string;
+    location: string;
+    category: string;
+    image: string;
+    aspect?: string;
+}
+
+interface StoriesGalleryProps {
+    stories?: StoryItem[];
+}
+
+const defaultStories: StoryItem[] = [
     { id: 1, title: 'Four Seasons Bora Bora', location: 'French Polynesia', category: 'Resorts', image: '/hero-dms.png', aspect: 'landscape' },
     { id: 2, title: 'Aman Tokyo', location: 'Japan', category: 'Hotels', image: '/hero-dms.png', aspect: 'portrait' },
     { id: 3, title: 'Amangiri', location: 'Utah, USA', category: 'Destinations', image: '/hero-dms.png', aspect: 'landscape' },
@@ -18,7 +31,7 @@ const storiesData = [
     { id: 9, title: 'Cheval Blanc St-Barth', location: 'St. Barts', category: 'Resorts', image: '/hero-dms.png', aspect: 'portrait' },
 ];
 
-const categories = ['All', 'Hotels', 'Resorts', 'Destinations', 'Editorial'];
+const defaultCategories = ['All', 'Hotels', 'Resorts', 'Destinations', 'Editorial'];
 
 // Helper to determine tailwind aspect ratio classes based on the 'aspect' field
 const getAspectClass = (aspect: string) => {
@@ -30,7 +43,18 @@ const getAspectClass = (aspect: string) => {
     }
 };
 
-export default function StoriesGallery() {
+const aspectRotation = ['landscape', 'portrait', 'landscape', 'portrait', 'square', 'portrait', 'landscape', 'square', 'portrait'];
+
+export default function StoriesGallery({ stories }: StoriesGalleryProps) {
+    const storiesData = stories?.length ? stories.map((s, i) => ({
+        ...s,
+        aspect: s.aspect || aspectRotation[i % aspectRotation.length],
+    })) : defaultStories;
+
+    const categories = stories?.length
+        ? ['All', ...Array.from(new Set(storiesData.map(s => s.category)))]
+        : defaultCategories;
+
     const [activeCategory, setActiveCategory] = useState('All');
 
     const filteredStories = activeCategory === 'All'
@@ -77,8 +101,8 @@ export default function StoriesGallery() {
                                 transition={{ duration: 0.5, ease: "easeOut" }}
                                 className="break-inside-avoid relative group overflow-hidden bg-bg-elevated block"
                             >
-                                <Link href={`/stories/${story.id}`} className="block w-full h-full">
-                                    <div className={`relative w-full ${getAspectClass(story.aspect)}`}>
+                                <Link href={`/stories/${story.slug || story.id}`} className="block w-full h-full">
+                                    <div className={`relative w-full ${getAspectClass(story.aspect || 'portrait')}`}>
                                         <Image
                                             src={story.image}
                                             alt={story.title}

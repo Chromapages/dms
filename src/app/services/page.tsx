@@ -1,11 +1,17 @@
-'use client';
-
-import { motion } from 'framer-motion';
-import Image from 'next/image';
+import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowUpRight, Camera, Video, BookOpen, Award, CheckCircle } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
+import ServicesContent from '@/components/ServicesContent';
+import ServicesStats from '@/components/ServicesStats';
+import type { ServiceItem } from '@/components/ServicesContent';
+import { getServices } from '@/lib/sanity';
 
-const services = [
+export const metadata: Metadata = {
+  title: 'Services | DMS',
+  description: 'Comprehensive visual storytelling for the world\'s finest hospitality brands.',
+};
+
+const fallbackServices: ServiceItem[] = [
   {
     id: "01",
     title: "Photography",
@@ -47,14 +53,20 @@ const processSteps = [
   { step: "04", title: "Deliver", description: "You receive professionally edited images and a finished product that exceeds expectations." },
 ];
 
-const stats = [
-  { value: "500+", label: "Projects Delivered" },
-  { value: "98%", label: "Client Satisfaction" },
-  { value: "25+", label: "Industry Awards" },
-  { value: "15+", label: "Years Experience" },
-];
+export default async function ServicesPage() {
+  const rawServices = await getServices().catch(() => []);
 
-export default function ServicesPage() {
+  const services: ServiceItem[] = rawServices?.length
+    ? rawServices.map((s: { _id: string; title: string; tagline: string; description: string; deliverables: string[] }) => ({
+        id: s._id,
+        title: s.title,
+        tagline: s.tagline || '',
+        description: s.description || '',
+        deliverables: s.deliverables || [],
+        image: '/hero-dms.png',
+      }))
+    : fallbackServices;
+
   return (
     <div className="min-h-screen bg-bg selection:bg-accent/30 selection:text-text-primary pt-32 transition-colors duration-300">
 
@@ -72,75 +84,7 @@ export default function ServicesPage() {
       </header>
 
       {/* Services List */}
-      <section className="space-y-32 md:space-y-48 pb-32">
-        {services.map((service, index) => (
-          <div key={service.id} className="max-w-[1440px] mx-auto px-8 grid lg:grid-cols-2 gap-16 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: index % 2 === 0 ? -30 : 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 1 }}
-              className={index % 2 === 1 ? 'lg:order-2' : ''}
-            >
-              <div className="flex items-center gap-6 mb-8">
-                <span className="text-5xl md:text-7xl font-serif text-accent/20 italic">
-                  {service.id}
-                </span>
-                <div className="h-px flex-1 bg-text-primary/10" />
-              </div>
-
-              <p className="text-accent text-sm uppercase tracking-widest font-medium mb-4">
-                {service.tagline}
-              </p>
-              <h2 className="text-4xl md:text-5xl font-serif text-text-primary mb-8 leading-tight">
-                {service.title}
-              </h2>
-              <p className="text-text-secondary text-lg font-light leading-relaxed mb-12 max-w-xl">
-                {service.description}
-              </p>
-
-              <div className="mb-12">
-                <h3 className="text-sm uppercase tracking-widest font-bold text-text-primary mb-6">
-                  Deliverables
-                </h3>
-                <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {service.deliverables.map((item, i) => (
-                    <li key={i} className="flex items-start gap-3 text-text-secondary font-light">
-                      <CheckCircle className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <Link
-                href="/inquiry"
-                className="inline-flex items-center gap-3 bg-accent text-white px-10 py-4 text-sm tracking-widest uppercase font-medium hover:bg-text-primary transition-colors duration-300"
-              >
-                Inquire Now
-                <ArrowUpRight size={18} />
-              </Link>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 1.2 }}
-              className={`relative aspect-[16/9] md:aspect-[4/5] bg-bg-elevated overflow-hidden ${index % 2 === 1 ? 'lg:order-1' : ''}`}
-            >
-              <Image
-                src={service.image}
-                alt={service.title}
-                fill
-                className="object-cover grayscale-[20%] hover:grayscale-0 transition-all duration-700"
-                sizes="(max-width: 768px) 100vw, 50vw"
-              />
-              <div className="absolute inset-0 bg-black/5" />
-            </motion.div>
-          </div>
-        ))}
-      </section>
+      <ServicesContent services={services} />
 
       {/* Process Section */}
       <section className="bg-bg-elevated py-32 md:py-48 transition-colors duration-300">
@@ -176,28 +120,7 @@ export default function ServicesPage() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-24 md:py-32 border-b border-text-primary/5">
-        <div className="max-w-[1440px] mx-auto px-8">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-12 text-center">
-            {stats.map((stat, i) => (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1, duration: 0.8 }}
-              >
-                <p className="text-4xl md:text-6xl font-serif text-text-primary mb-4 italic">
-                  {stat.value}
-                </p>
-                <p className="text-text-secondary text-xs uppercase tracking-widest font-medium">
-                  {stat.label}
-                </p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <ServicesStats />
 
       {/* Final CTA */}
       <section className="py-32 md:py-48 bg-bg transition-colors duration-300">
