@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
+import DarkModeToggle from './DarkModeToggle';
 
 const navItems = [
   { href: '/stories', label: 'Stories' },
@@ -39,10 +40,8 @@ export default function CinematicNav() {
         <div className="max-w-[1440px] mx-auto px-8 flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="relative z-50">
-            <span className={`font-serif text-xl tracking-wide transition-colors ${
-              scrolled || menuOpen ? 'text-white' : 'text-white'
-            }`}>
-              DMS
+            <span className="font-serif text-sm tracking-widest transition-colors text-text-primary">
+              Destination Media Services
             </span>
           </Link>
 
@@ -52,15 +51,16 @@ export default function CinematicNav() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="label hover:text-white transition-colors relative group"
+                className="label text-white hover:text-white transition-colors relative group"
               >
                 {item.label}
                 <span className="absolute -bottom-1 left-0 w-0 h-px bg-[#C4A962] transition-all duration-300 group-hover:w-full" />
               </Link>
             ))}
-            <Link href="/inquiry" className="btn-ghost">
+            <Link href="/inquiry" className="btn-ghost text-white border-white/30 hover:border-[#C4A962]">
               Contact
             </Link>
+            <DarkModeToggle />
           </div>
 
           {/* Mobile Menu Button */}

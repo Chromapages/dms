@@ -1,114 +1,176 @@
-"use client";
+'use client';
 
-import { useRef } from "react";
-import Link from "next/link";
-import { ArrowLeft, MapPin, Globe, Star, Shield, Users } from "lucide-react";
-import { motion, useInView } from "framer-motion";
-import { FadeIn, StaggerContainer, StaggerItem } from "@/components/Animations";
+import { useState } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowUpRight } from 'lucide-react';
 
 const destinations = [
-  { name: "Bora Bora", region: "French Polynesia", projects: 24, description: "Where emerald lagoons meet endless blue." },
-  { name: "Tuscany", region: "Italy", projects: 18, description: "Rolling hills and timeless romance." },
-  { name: "Santorini", region: "Greece", projects: 15, description: "White-washed villages above the caldera." },
-  { name: "Bali", region: "Indonesia", projects: 21, description: "Spiritual tranquility meets landscapes." },
-  { name: "Amalfi Coast", region: "Italy", projects: 12, description: "Dramatic cliffs and azure seas." },
-  { name: "Maldives", region: "Maldives", projects: 19, description: "Crystal waters and overwater villas." },
-  { name: "Paris", region: "France", projects: 16, description: "The City of Light." },
-  { name: "Japan", region: "Asia", projects: 14, description: "Ancient traditions meet modern elegance." },
-  { name: "Swiss Alps", region: "Switzerland", projects: 9, description: "Majestic peaks year-round." },
+  { id: 1, name: 'Bora Bora', region: 'French Polynesia', projects: 24, description: 'Where emerald lagoons meet an endless Pacific horizon.', image: '/hero-dms.png', aspect: 'portrait' },
+  { id: 2, name: 'Tuscany', region: 'Italy', projects: 18, description: 'Rolling hills, golden light, and timeless romance.', image: '/hero-dms.png', aspect: 'landscape' },
+  { id: 3, name: 'Santorini', region: 'Greece', projects: 15, description: 'White-washed villages perched above the caldera.', image: '/hero-dms.png', aspect: 'square' },
+  { id: 4, name: 'Bali', region: 'Indonesia', projects: 21, description: 'Spiritual tranquility woven into verdant landscapes.', image: '/hero-dms.png', aspect: 'portrait' },
+  { id: 5, name: 'Amalfi Coast', region: 'Italy', projects: 12, description: 'Dramatic cliffs cascading into azure seas.', image: '/hero-dms.png', aspect: 'landscape' },
+  { id: 6, name: 'Maldives', region: 'Maldives', projects: 19, description: 'Crystal-clear waters and overwater bliss.', image: '/hero-dms.png', aspect: 'square' },
+  { id: 7, name: 'Japan', region: 'Asia', projects: 14, description: 'Ancient traditions meeting modern elegance.', image: '/hero-dms.png', aspect: 'portrait' },
+  { id: 8, name: 'The Swiss Alps', region: 'Switzerland', projects: 9, description: 'Majestic peaks and pristine snowscapes.', image: '/hero-dms.png', aspect: 'landscape' },
 ];
 
-const trustBadges = [
-  { icon: Shield, label: "Fully Insured" },
-  { icon: Star, label: "5-Star Rated" },
-  { icon: Users, label: "40+ Countries" },
-];
+const regions = ['All', 'Europe', 'Asia', 'Pacific', 'Indian Ocean'];
 
-function AnimatedSection({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-50px" });
-  return <motion.div ref={ref} initial={{ opacity: 0, y: 30 }} animate={isInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay }}>{children}</motion.div>;
-}
+const getAspectClass = (aspect: string) => {
+  switch (aspect) {
+    case 'portrait': return 'aspect-[3/4]';
+    case 'landscape': return 'aspect-[16/9]';
+    default: return 'aspect-square';
+  }
+};
 
-export default function Destinations() {
+export default function DestinationsPage() {
+  const [activeRegion, setActiveRegion] = useState('All');
+  const [hoveredId, setHoveredId] = useState<number | null>(null);
+
+  const filtered = activeRegion === 'All'
+    ? destinations
+    : destinations.filter(d => d.region.includes(activeRegion) || d.name.includes(activeRegion));
+
   return (
-    <>
-      <section className="pt-32 pb-16 bg-[#FAF9F7] dark:bg-[#0A0A0A]">
-        <div className="container-main">
-          <AnimatedSection>
-            <Link href="/" className="inline-flex items-center gap-2 text-[#6B6B6B] hover:text-[#C4A962] transition-colors mb-8">
-              <ArrowLeft className="w-4 h-4" /> Back to Home
-            </Link>
-            <h1 className="text-5xl md:text-7xl font-serif mb-4">Destinations</h1>
-            <p className="text-[#6B6B6B] dark:text-gray-400 max-w-2xl text-lg">We&apos;ve captured beauty in the world&apos;s most extraordinary places</p>
-          </AnimatedSection>
-        </div>
-      </section>
+    <div className="min-h-screen bg-bg pt-32 selection:bg-accent/30">
 
-      <section className="py-8 bg-white dark:bg-[#1A1A1A] border-b border-gray-100 dark:border-gray-800">
-        <div className="container-main">
-          <div className="flex flex-wrap justify-center gap-8">
-            {trustBadges.map((badge, index) => (
-              <div key={badge.label} className="flex items-center gap-2 text-[#6B6B6B] dark:text-gray-400">
-                <badge.icon className="w-5 h-5 text-[#C4A962]" />
-                <span className="font-medium">{badge.label}</span>
-              </div>
+      {/* Page Header */}
+      <header className="max-w-[1440px] mx-auto px-6 pt-16 pb-12 md:pb-24">
+        <p className="section-number text-accent mb-6 uppercase tracking-widest text-sm font-medium">
+          Where We Work
+        </p>
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-serif font-light text-text-primary tracking-tight">
+            Destinations
+          </h1>
+          <p className="text-text-secondary font-light text-lg max-w-md leading-relaxed md:pb-2">
+            From secluded island resorts to alpine retreats — we&apos;ve captured
+            the world&apos;s most extraordinary places.
+          </p>
+        </div>
+      </header>
+
+      {/* Region Filter */}
+      <div className="sticky top-[80px] z-40 bg-[var(--bg)] border-b border-text-primary/10 py-4 mb-12 transition-colors duration-300">
+        <div className="max-w-[1440px] mx-auto px-6">
+          <ul className="flex items-center gap-8 overflow-x-auto no-scrollbar">
+            {regions.map((region) => (
+              <li key={region}>
+                <button
+                  onClick={() => setActiveRegion(region)}
+                  className={`text-sm tracking-widest uppercase pb-1 border-b-2 transition-colors whitespace-nowrap ${activeRegion === region
+                      ? 'border-accent text-text-primary font-medium'
+                      : 'border-transparent text-text-secondary hover:text-text-primary font-light'
+                    }`}
+                >
+                  {region}
+                </button>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
-      </section>
+      </div>
 
-      <section className="py-24">
-        <div className="container-main">
-          <StaggerContainer className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {destinations.map((dest, index) => (
-              <StaggerItem key={dest.name}>
-                <Link href={`/destinations/${dest.name.toLowerCase().replace(" ", "-")}`} className="group block relative overflow-hidden rounded-xl aspect-[4/5] img-zoom">
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent z-10" />
-                  <div className="absolute inset-0 bg-[#E8E4DC] dark:bg-gray-800 group-hover:scale-105 transition-transform duration-600" />
-                  <div className="absolute inset-0 z-20 p-8 flex flex-col justify-end">
-                    <div className="flex items-center gap-2 text-white/70 text-sm mb-2">
-                      <Globe className="w-4 h-4" /> {dest.region}
-                    </div>
-                    <h3 className="text-3xl font-serif text-white mb-2">{dest.name}</h3>
-                    <p className="text-white/80 text-sm mb-4">{dest.description}</p>
-                    <div className="inline-flex items-center gap-2 text-[#C4A962] text-sm font-medium">
-                      {dest.projects} Projects <span className="group-hover:translate-x-1 transition-transform">→</span>
+      {/* Masonry Grid */}
+      <div className="max-w-[1440px] mx-auto px-6 pb-32">
+        <motion.div layout className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
+          <AnimatePresence mode="popLayout">
+            {filtered.map((dest) => (
+              <motion.div
+                key={dest.id}
+                layout
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                transition={{ duration: 0.5, ease: 'easeOut' }}
+                className="break-inside-avoid"
+              >
+                <Link
+                  href={`/destinations/${dest.name.toLowerCase().replace(/\s+/g, '-')}`}
+                  className="group block relative overflow-hidden bg-bg-elevated"
+                  onMouseEnter={() => setHoveredId(dest.id)}
+                  onMouseLeave={() => setHoveredId(null)}
+                >
+                  <div className={`relative w-full ${getAspectClass(dest.aspect)}`}>
+                    <Image
+                      src={dest.image}
+                      alt={dest.name}
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    />
+                    {/* Permanent subtle gradient */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+
+                    {/* Hover overlay */}
+                    <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                    {/* Content */}
+                    <div className="absolute inset-0 p-6 md:p-8 flex flex-col justify-end">
+                      <div className="translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
+                        <p className="text-accent text-xs tracking-widest uppercase mb-2 font-medium">
+                          {dest.region}
+                        </p>
+                        <h2 className="text-white text-2xl md:text-3xl font-serif font-light mb-2">
+                          {dest.name}
+                        </h2>
+                        <p className="text-white/0 group-hover:text-white/70 text-sm font-light transition-colors duration-500 leading-relaxed mb-4 line-clamp-2">
+                          {dest.description}
+                        </p>
+                        <div className="flex items-center justify-between">
+                          <span className="text-white/60 text-xs tracking-widest uppercase">
+                            {dest.projects} Projects
+                          </span>
+                          <ArrowUpRight
+                            size={20}
+                            className="text-white opacity-0 group-hover:opacity-100 transition-all duration-300 -translate-y-1 translate-x-1 group-hover:translate-y-0 group-hover:translate-x-0"
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </Link>
-              </StaggerItem>
+              </motion.div>
             ))}
-          </StaggerContainer>
-        </div>
-      </section>
+          </AnimatePresence>
+        </motion.div>
 
-      <section className="py-24 bg-white dark:bg-[#1A1A1A]">
-        <div className="container-main">
-          <AnimatedSection className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-serif mb-4">Global Reach</h2>
-            <p className="text-[#6B6B6B] dark:text-gray-400 max-w-2xl mx-auto">While these are our most frequently visited destinations, we work worldwide</p>
-          </AnimatedSection>
-          <div className="aspect-[21/9] bg-[#FAF9F7] dark:bg-[#242424] rounded-xl flex items-center justify-center">
-            <div className="text-center">
-              <MapPin className="w-12 h-12 text-[#C4A962] mx-auto mb-4" />
-              <p className="text-[#6B6B6B] dark:text-gray-400">Interactive map coming soon</p>
-            </div>
+        {filtered.length === 0 && (
+          <p className="text-center py-32 text-text-secondary font-light">
+            No destinations found for this region.
+          </p>
+        )}
+      </div>
+
+      {/* Closing CTA Strip */}
+      <div className="bg-bg-elevated border-t border-text-primary/10 py-24">
+        <div className="max-w-[1440px] mx-auto px-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
+          <div>
+            <p className="section-number text-accent mb-4 uppercase tracking-widest text-xs font-medium">
+              Global Reach
+            </p>
+            <h2 className="text-3xl md:text-5xl font-serif font-light text-text-primary">
+              Have destination, will travel.
+            </h2>
+            <p className="text-text-secondary font-light mt-4 max-w-md leading-relaxed">
+              Whether it&apos;s on this list or somewhere entirely new, we&apos;d
+              love to capture your story.
+            </p>
           </div>
+          <Link
+            href="/inquiry"
+            className="inline-flex items-center gap-3 bg-accent text-white px-10 py-4 text-sm tracking-widest uppercase font-medium hover:bg-text-primary transition-colors duration-300 whitespace-nowrap"
+          >
+            Start a Project
+            <ArrowUpRight size={16} />
+          </Link>
         </div>
-      </section>
+      </div>
 
-      <section className="py-24 bg-[#C4A962]">
-        <div className="container-main">
-          <AnimatedSection className="text-center max-w-2xl mx-auto">
-            <h2 className="text-4xl md:text-5xl font-serif text-white mb-4">Have Destination, Will Travel</h2>
-            <p className="text-white/80 mb-8">Whether it&apos;s on this list or somewhere entirely new, we&apos;d love to capture your story.</p>
-            <Link href="/inquiry" className="inline-flex bg-white text-[#1A1A1A] px-8 py-4 rounded-full font-medium hover:bg-[#1A1A1A] hover:text-white transition-colors">
-              Tell Us About Your Destination
-            </Link>
-          </AnimatedSection>
-        </div>
-      </section>
-    </>
+    </div>
   );
 }

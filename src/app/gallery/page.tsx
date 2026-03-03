@@ -46,7 +46,7 @@ const trustBadges = [
   { icon: Camera, label: "Professional Gear" },
 ];
 
-function AnimatedSection({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
+function AnimatedSection({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-50px" });
   return (
@@ -55,6 +55,7 @@ function AnimatedSection({ children, delay = 0 }: { children: React.ReactNode; d
       initial={{ opacity: 0, y: 30 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.6, delay }}
+      className={className}
     >
       {children}
     </motion.div>
@@ -130,11 +131,10 @@ export default function Gallery() {
               <button
                 key={filter.id}
                 onClick={() => setActiveFilter(filter.id)}
-                className={`px-5 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
-                  activeFilter === filter.id
+                className={`px-5 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${activeFilter === filter.id
                     ? "bg-[#1A1A1A] dark:bg-white text-white dark:text-[#1A1A1A]"
                     : "bg-gray-100 dark:bg-gray-800 text-[#6B6B6B] dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
-                }`}
+                  }`}
               >
                 {filter.label}
               </button>

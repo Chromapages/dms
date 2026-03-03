@@ -1,10 +1,9 @@
-"use client";
+'use client';
 
-import { useRef } from "react";
-import Link from "next/link";
-import { ArrowLeft, Award, Globe, Heart, Star, Shield, Users, Mail, Phone, MapPin } from "lucide-react";
-import { motion, useInView } from "framer-motion";
-import { FadeIn, StaggerContainer, StaggerItem } from "@/components/Animations";
+import { motion } from 'framer-motion';
+import Image from 'next/image';
+import Link from 'next/link';
+import { ArrowUpRight, Heart, Globe, Award } from 'lucide-react';
 
 const awards = [
   { name: "Condé Nast Traveler", year: "2025" },
@@ -14,9 +13,21 @@ const awards = [
 ];
 
 const values = [
-  { icon: Heart, title: "Authentic Connection", description: "We believe the most powerful imagery comes from genuine moments. We don't just capture places—we capture feelings." },
-  { icon: Globe, title: "Global Perspective", description: "With experience across 40+ countries, we understand diverse cultures and know how to tell stories that resonate worldwide." },
-  { icon: Award, title: "Uncompromising Quality", description: "Every image we deliver meets the highest standards. We're detail-obsessed because we know your reputation depends on it." },
+  {
+    id: "01",
+    title: "Authentic Connection",
+    description: "We believe the most powerful imagery comes from genuine moments. We don't just capture places—we capture feelings."
+  },
+  {
+    id: "02",
+    title: "Global Perspective",
+    description: "With experience across 40+ countries, we understand diverse cultures and know how to tell stories that resonate worldwide."
+  },
+  {
+    id: "03",
+    title: "Uncompromising Quality",
+    description: "Every image we deliver meets the highest standards. We're detail-obsessed because we know your reputation depends on it."
+  },
 ];
 
 const stats = [
@@ -26,127 +37,179 @@ const stats = [
   { value: "98%", label: "Client Retention" },
 ];
 
-const trustBadges = [
-  { icon: Shield, label: "Fully Insured" },
-  { icon: Star, label: "5-Star Rated" },
-  { icon: Users, label: "Trusted by 500+" },
-];
-
-function AnimatedSection({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-50px" });
-  return <motion.div ref={ref} initial={{ opacity: 0, y: 30 }} animate={isInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay }}>{children}</motion.div>;
-}
-
-export default function About() {
+export default function AboutPage() {
   return (
-    <>
-      <section className="pt-32 pb-16 bg-[#FAF9F7] dark:bg-[#0A0A0A]">
-        <div className="container-main">
-          <AnimatedSection>
-            <Link href="/" className="inline-flex items-center gap-2 text-[#6B6B6B] hover:text-[#C4A962] transition-colors mb-8">
-              <ArrowLeft className="w-4 h-4" /> Back to Home
-            </Link>
-            <h1 className="text-5xl md:text-7xl font-serif mb-4">About Us</h1>
-            <p className="text-[#6B6B6B] dark:text-gray-400 max-w-2xl text-lg">We exist to help the world&apos;s most beautiful places tell their stories</p>
-          </AnimatedSection>
+    <div className="min-h-screen bg-bg selection:bg-accent/30 selection:text-text-primary pt-32 transition-colors duration-300">
+
+      {/* Header */}
+      <header className="max-w-[1440px] mx-auto px-8 pt-16 pb-12 md:pb-24 text-center">
+        <p className="section-number text-accent mb-6 uppercase tracking-widest text-sm font-medium">
+          DMS / Perspective
+        </p>
+        <h1 className="text-5xl md:text-7xl lg:text-8xl font-serif font-light text-text-primary mb-8 tracking-tight max-w-4xl mx-auto">
+          Beyond the Image
+        </h1>
+        <p className="text-text-secondary font-light text-lg md:text-xl max-w-2xl leading-relaxed mx-auto">
+          We exist to help the world&apos;s most beautiful places tell their stories. A collective of visual artists dedicated to the intersection of architecture, nature, and high-end hospitality.
+        </p>
+      </header>
+
+      {/* Hero Image */}
+      <section className="mb-24 md:mb-32">
+        <div className="max-w-[1440px] mx-auto px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1.2 }}
+            className="relative aspect-[21/9] bg-bg-elevated overflow-hidden grayscale-[20%]"
+          >
+            <Image
+              src="/hero-dms.png"
+              alt="Editorial atmosphere"
+              fill
+              className="object-cover"
+              priority
+            />
+            <div className="absolute inset-0 bg-black/10" />
+          </motion.div>
         </div>
       </section>
 
-      <section className="py-8 bg-white dark:bg-[#1A1A1A] border-b border-gray-100 dark:border-gray-800">
-        <div className="container-main">
-          <div className="flex flex-wrap justify-center gap-8">
-            {trustBadges.map((badge, index) => (
-              <div key={badge.label} className="flex items-center gap-2 text-[#6B6B6B] dark:text-gray-400">
-                <badge.icon className="w-5 h-5 text-[#C4A962]" />
-                <span className="font-medium">{badge.label}</span>
-              </div>
-            ))}
+      {/* The Story */}
+      <section className="max-w-[1440px] mx-auto px-8 mb-32 md:mb-48">
+        <div className="grid lg:grid-cols-12 gap-16 items-start">
+          <div className="lg:col-span-5">
+            <p className="section-number text-accent mb-6">01 / The Narrative</p>
+            <h2 className="text-4xl md:text-5xl font-serif text-text-primary leading-tight">
+              Crafting legacy through cinematic vision.
+            </h2>
+          </div>
+          <div className="lg:col-span-6 lg:col-start-7 text-text-secondary font-light text-lg leading-relaxed space-y-8 py-2">
+            <p>
+              Destination Media Services was born from a simple observation: the world&apos;s most breathtaking destinations deserved imagery as stunning as they are. founded by a collective of visual storytellers, we sought to bridge the gap between commercial photography and fine art.
+            </p>
+            <p>
+              Since our inception in 2019, we have traversed the globe, from the secluded islands of the Pacific to the historic palazzos of Italy. Our approach is rooted in patience and precision—waiting for the exact moment when light and architecture harmonize.
+            </p>
+            <p>
+              We don&apos;t just document properties; we curate digital legacies. Every frame is a deliberate choice, every edit a refinement of the brand&apos;s soul.
+            </p>
           </div>
         </div>
       </section>
 
-      <section className="py-24">
-        <div className="container-main">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <AnimatedSection>
-              <div className="aspect-square rounded-lg overflow-hidden img-zoom">
-                <div className="w-full h-full bg-[#E8E4DC] dark:bg-gray-800" />
-              </div>
-            </AnimatedSection>
-            <AnimatedSection delay={0.2}>
-              <h2 className="text-4xl font-serif mb-6">The DMS Story</h2>
-              <div className="space-y-4 text-[#6B6B6B] dark:text-gray-400 leading-relaxed">
-                <p>Destination Media Services was born from a simple observation: the world&apos;s most breathtaking destinations deserved imagery as stunning as they are.</p>
-                <p>Founded in 2018, we started with a small team of photographers who shared a passion for travel and an obsession with visual excellence. Since then, we&apos;ve grown into a full-service visual storytelling agency.</p>
-                <p>But our mission remains unchanged: to create imagery that doesn&apos;t just showcase a destination—it makes people feel something.</p>
-              </div>
-            </AnimatedSection>
+      {/* Values / Pillars */}
+      <section className="bg-bg-elevated py-32 md:py-48 transition-colors duration-300">
+        <div className="max-w-[1440px] mx-auto px-8">
+          <div className="text-center mb-24 md:mb-32">
+            <p className="section-number text-accent mb-6">02 / Core Pillars</p>
+            <h2 className="text-4xl md:text-6xl font-serif text-text-primary mb-8">
+              What Defines Us
+            </h2>
+            <p className="text-text-secondary font-light max-w-xl mx-auto">
+              Our work is guided by a set of principles that ensure consistency, quality, and artistic integrity across every project.
+            </p>
           </div>
-        </div>
-      </section>
 
-      <section className="py-24 bg-white dark:bg-[#1A1A1A]">
-        <div className="container-main">
-          <AnimatedSection className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-serif mb-4">Our Values</h2>
-            <p className="text-[#6B6B6B] dark:text-gray-400 max-w-2xl mx-auto">The principles that guide everything we do</p>
-          </AnimatedSection>
-          <StaggerContainer className="grid md:grid-cols-3 gap-8">
-            {values.map((value, index) => (
-              <StaggerItem key={index}>
-                <div className="p-8 rounded-xl bg-[#FAF9F7] dark:bg-[#242424] h-full">
-                  <value.icon className="w-10 h-10 text-[#C4A962] mb-4" />
-                  <h3 className="text-xl font-serif mb-3">{value.title}</h3>
-                  <p className="text-[#6B6B6B] dark:text-gray-400 text-sm leading-relaxed">{value.description}</p>
+          <div className="grid md:grid-cols-3 gap-16 md:gap-24">
+            {values.map((value) => (
+              <div key={value.id} className="relative">
+                <span className="text-7xl font-serif text-accent/10 absolute -top-10 -left-6 italic select-none">
+                  {value.id}
+                </span>
+                <div className="relative z-10">
+                  <h3 className="text-2xl font-serif text-text-primary mb-6">
+                    {value.title}
+                  </h3>
+                  <div className="w-12 h-px bg-accent mb-6" />
+                  <p className="text-text-secondary font-light leading-relaxed">
+                    {value.description}
+                  </p>
                 </div>
-              </StaggerItem>
-            ))}
-          </StaggerContainer>
-        </div>
-      </section>
-
-      <section className="py-24 bg-[#1A1A1A] text-white">
-        <div className="container-main">
-          <StaggerContainer className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            {stats.map((stat, index) => (
-              <StaggerItem key={stat.label}>
-                <p className="text-5xl md:text-6xl font-serif text-[#C4A962] mb-2">{stat.value}</p>
-                <p className="text-white/60">{stat.label}</p>
-              </StaggerItem>
-            ))}
-          </StaggerContainer>
-        </div>
-      </section>
-
-      <section className="py-24">
-        <div className="container-main">
-          <AnimatedSection className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-serif mb-4">Recognition</h2>
-            <p className="text-[#6B6B6B] dark:text-gray-400">Featured in leading publications</p>
-          </AnimatedSection>
-          <div className="flex flex-wrap justify-center items-center gap-12 opacity-50">
-            {awards.map((award, index) => (
-              <div key={index} className="text-center">
-                <p className="font-serif text-xl">{award.name}</p>
-                <p className="text-sm text-[#6B6B6B]">{award.year}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="py-24 bg-[#C4A962]">
-        <div className="container-main">
-          <AnimatedSection className="text-center max-w-2xl mx-auto">
-            <h2 className="text-4xl md:text-5xl font-serif text-white mb-4">Let&apos;s Create Together</h2>
-            <p className="text-white/80 mb-8">Ready to tell your story? We&apos;d love to hear from you.</p>
-            <Link href="/inquiry" className="inline-flex bg-white text-[#1A1A1A] px-8 py-4 rounded-full font-medium hover:bg-[#1A1A1A] hover:text-white transition-colors">
-              Get in Touch
-            </Link>
-          </AnimatedSection>
+      {/* Stats Section */}
+      <section className="py-24 md:py-32 border-b border-text-primary/5">
+        <div className="max-w-[1440px] mx-auto px-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-12 text-center">
+            {stats.map((stat, i) => (
+              <motion.div
+                key={stat.label}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1, duration: 0.8 }}
+              >
+                <p className="text-4xl md:text-6xl font-serif text-text-primary mb-4 italic">
+                  {stat.value}
+                </p>
+                <p className="text-text-secondary text-xs uppercase tracking-widest font-medium">
+                  {stat.label}
+                </p>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
-    </>
+
+      {/* Recognition / Archive */}
+      <section className="py-32 md:py-48">
+        <div className="max-w-[1440px] mx-auto px-8">
+          <div className="grid lg:grid-cols-12 gap-16">
+            <div className="lg:col-span-5">
+              <p className="section-number text-accent mb-6">03 / Recognition</p>
+              <h2 className="text-4xl md:text-5xl font-serif text-text-primary mb-8">
+                The Archive
+              </h2>
+              <p className="text-text-secondary font-light leading-relaxed">
+                Our pursuit of visual excellence has been recognized by some of the most prestigious voices in travel and design.
+              </p>
+            </div>
+            <div className="lg:col-span-6 lg:col-start-7">
+              <ul className="divide-y divide-text-primary/10 border-t border-text-primary/10">
+                {awards.map((award, i) => (
+                  <li key={i} className="py-8 flex justify-between items-center group">
+                    <div>
+                      <h4 className="text-xl md:text-2xl font-serif text-text-primary group-hover:text-accent transition-colors">
+                        {award.name}
+                      </h4>
+                      <p className="text-text-secondary text-sm font-light mt-1">
+                        Publication & Editorial Feature
+                      </p>
+                    </div>
+                    <span className="text-text-primary/40 text-sm tracking-widest font-mono">
+                      {award.year}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section className="py-32 md:py-48 bg-bg-elevated transition-colors duration-300">
+        <div className="max-w-[1440px] mx-auto px-8 text-center">
+          <p className="section-number text-accent mb-6">Join the Journey</p>
+          <h2 className="text-4xl md:text-7xl font-serif font-light text-text-primary mb-12">
+            Let&apos;s create together.
+          </h2>
+          <Link
+            href="/inquiry"
+            className="inline-flex items-center gap-3 bg-accent text-white px-12 py-5 text-sm tracking-widest uppercase font-medium hover:bg-text-primary transition-colors duration-300"
+          >
+            Get in Touch
+            <ArrowUpRight size={20} />
+          </Link>
+        </div>
+      </section>
+
+    </div>
   );
 }

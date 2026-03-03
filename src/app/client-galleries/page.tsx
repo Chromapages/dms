@@ -20,11 +20,11 @@ const trustBadges = [
 
 const CORRECT_CODE = "DMS2026";
 
-function AnimatedSection({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
+function AnimatedSection({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-50px" });
   return (
-    <motion.div ref={ref} initial={{ opacity: 0, y: 30 }} animate={isInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay }}>
+    <motion.div ref={ref} initial={{ opacity: 0, y: 30 }} animate={isInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay }} className={className}>
       {children}
     </motion.div>
   );
@@ -85,13 +85,13 @@ export default function ClientGalleries() {
                 <p className="text-[#6B6B6B] dark:text-gray-400 mb-8 text-sm">
                   Enter your gallery access code to view your images. Check your email for the unique link.
                 </p>
-                
+
                 <form onSubmit={handleSubmit} className="space-y-4">
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     value={accessCode}
                     onChange={(e) => setAccessCode(e.target.value.toUpperCase())}
-                    placeholder="Enter access code" 
+                    placeholder="Enter access code"
                     className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-[#FAF9F7] dark:bg-[#242424] text-center text-lg tracking-widest uppercase focus:outline-none focus:border-[#C4A962]"
                   />
                   {error && <p className="text-red-500 text-sm">{error}</p>}

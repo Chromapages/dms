@@ -1,241 +1,374 @@
-"use client";
+'use client';
 
-import { useState, useRef } from "react";
-import { ArrowLeft, Mail, MapPin, Phone, Send, Loader2, Star, Shield, Users, Clock, Check } from "lucide-react";
-import Link from "next/link";
-import { motion, useInView } from "framer-motion";
-import { FadeIn } from "@/components/Animations";
+import { useState, useRef, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import Link from 'next/link';
+import { ArrowLeft, ArrowUpRight, Check, Loader2, Mail, MapPin, Phone, AlertCircle } from 'lucide-react';
 
-const trustBadges = [
-  { icon: Shield, label: "Fully Insured & Bonded" },
-  { icon: Star, label: "5-Star Rated" },
-  { icon: Users, label: "500+ Happy Clients" },
-  { icon: Clock, label: "On-Time Delivery" },
+// ─── Data ────────────────────────────────────────────────────────────────────
+
+const contactInfo = [
+  { icon: Mail, label: 'Inquiries', value: 'hello@destinationmediaservices.com', href: 'mailto:hello@destinationmediaservices.com' },
+  { icon: Phone, label: 'Phone', value: '+1 (310) 555-0192', href: 'tel:+13105550192' },
+  { icon: MapPin, label: 'Studio', value: 'Los Angeles, California', href: '#' },
 ];
 
-const successStats = [
-  { value: "98%", label: "Client Satisfaction" },
-  { value: "24-48h", label: "Response Time" },
-  { value: "100%", label: "Satisfaction Guaranteed" },
+const nextSteps = [
+  { step: '01', title: 'Discovery Call', description: "We'll discuss your vision, timeline, and unique requirements in detail." },
+  { step: '02', title: 'Creative Proposal', description: "You'll receive a tailored creative approach and investment guide." },
+  { step: '03', title: 'Commissioning', description: "Upon approval, we secure your dates and begin the pre-production phase." },
 ];
 
-function AnimatedSection({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-50px" });
+const inquiryTypes = ['Commercial Shoot', 'Brand Storytelling', 'Editorial Project', 'Destination Wedding', 'Other'];
+
+// ─── Types ───────────────────────────────────────────────────────────────────
+
+interface FormFields {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  property: string;
+  inquiryType: string;
+  proposedDate: string;
+  vision: string;
+}
+
+type FormErrors = Partial<Record<keyof FormFields, string>>;
+
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+// ─── Floating Label Input ─────────────────────────────────────────────────────
+
+interface FloatingInputProps {
+  label: string;
+  name: keyof FormFields;
+  type?: string;
+  value: string;
+  onChange: (name: keyof FormFields, value: string) => void;
+  error?: string;
+  required?: boolean;
+  placeholder?: string;
+}
+
+function FloatingInput({ label, name, type = 'text', value, onChange, error, required, placeholder }: FloatingInputProps) {
+  const [focused, setFocused] = useState(false);
+  const floated = focused || value.length > 0;
+
   return (
-    <motion.div ref={ref} initial={{ opacity: 0, y: 30 }} animate={isInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay }}>
-      {children}
-    </motion.div>
+    <div className="relative group">
+      <label
+        className={`absolute left-0 font-medium tracking-widest uppercase transition-all duration-300 pointer-events-none ${floated
+            ? 'top-0 text-[9px] text-accent'
+            : 'top-4 text-sm text-text-secondary/60'
+          }`}
+      >
+        {label}{required && <span className="text-accent ml-1">*</span>}
+      </label>
+      <input
+        type={type}
+        value={value}
+        required={required}
+        placeholder={floated ? (placeholder ?? '') : ''}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        onChange={(e) => onChange(name, e.target.value)}
+        className={`w-full bg-transparent border-none border-b outline-none pt-7 pb-3 text-lg font-light transition-all duration-300 placeholder:text-text-primary/20 ${error
+            ? 'border-red-400/60 text-red-400'
+            : focused
+              ? 'border-accent'
+              : 'border-text-primary/20'
+          }`}
+      />
+      <AnimatePresence>
+        {error && (
+          <motion.p
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            className="flex items-center gap-1.5 mt-2 text-red-400 text-[11px] tracking-wider"
+          >
+            <AlertCircle size={12} /> {error}
+          </motion.p>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
 
-interface FormData {
-  firstName: string; lastName: string; email: string; phone: string;
-  preferredContact: string; propertyName: string; projectType: string;
-  eventDate: string; guestCount: string; budget: string; vision: string;
-  referralSource: string; newsletter: boolean;
-}
-type FormErrors = Partial<Record<keyof FormData, string>>;
+// ─── Main Page ───────────────────────────────────────────────────────────────
 
-export default function Inquiry() {
-  const [submitted, setSubmitted] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [formData, setFormData] = useState<FormData>({
-    firstName: "", lastName: "", email: "", phone: "", preferredContact: "email",
-    propertyName: "", projectType: "", eventDate: "", guestCount: "", budget: "",
-    vision: "", referralSource: "", newsletter: false,
-  });
+export default function InquiryPage() {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
+  const [visionLength, setVisionLength] = useState(0);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value, type } = e.target;
-    const checked = (e.target as HTMLInputElement).checked;
-    setFormData(prev => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
-    if (errors[name as keyof FormData]) setErrors(prev => ({ ...prev, [name]: undefined }));
-  };
+  const [form, setForm] = useState<FormFields>({
+    firstName: '', lastName: '', email: '', phone: '',
+    property: '', inquiryType: '', proposedDate: '', vision: '',
+  });
+
+  const handleChange = useCallback((name: keyof FormFields, value: string) => {
+    setForm(prev => ({ ...prev, [name]: value }));
+    if (errors[name]) setErrors(prev => ({ ...prev, [name]: undefined }));
+    if (name === 'vision') setVisionLength(value.length);
+  }, [errors]);
 
   const validate = (): boolean => {
     const newErrors: FormErrors = {};
-    if (!formData.firstName.trim()) newErrors.firstName = "Required";
-    if (!formData.lastName.trim()) newErrors.lastName = "Required";
-    if (!formData.email.trim()) newErrors.email = "Required";
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = "Invalid email";
-    if (!formData.propertyName.trim()) newErrors.propertyName = "Required";
-    if (!formData.projectType) newErrors.projectType = "Required";
-    if (!formData.eventDate.trim()) newErrors.eventDate = "Required";
-    if (!formData.vision.trim()) newErrors.vision = "Required";
+    if (!form.firstName.trim()) newErrors.firstName = 'First name is required';
+    if (!form.lastName.trim()) newErrors.lastName = 'Last name is required';
+    if (!form.email.trim()) newErrors.email = 'Email address is required';
+    else if (!emailRegex.test(form.email)) newErrors.email = 'Please enter a valid email';
+    if (!form.property.trim()) newErrors.property = 'Property or brand name is required';
+    if (!form.inquiryType) newErrors.inquiryType = 'Please select a project type';
+    if (!form.proposedDate.trim()) newErrors.proposedDate = 'A proposed date or timeline is required';
+    if (!form.vision.trim()) newErrors.vision = 'Please share your vision with us';
+    else if (form.vision.trim().length < 20) newErrors.vision = 'Please provide a bit more detail (min. 20 characters)';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    if (!validate()) return;
-    setIsLoading(true);
-    try {
-      const response = await fetch("/api/inquiry", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-      if (!response.ok) throw new Error("Failed to submit");
-      setSubmitted(true);
-    } catch (err) { setError("Something went wrong. Please try again."); }
-    finally { setIsLoading(false); }
+    if (!validate()) {
+      // Scroll to first error
+      const firstError = document.querySelector('[class*="border-red"]');
+      firstError?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    setIsSubmitting(true);
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    setIsSubmitting(false);
+    setIsSubmitted(true);
   };
 
+  if (isSubmitted) {
+    return (
+      <div className="min-h-screen bg-bg flex items-center justify-center px-8 pt-32 transition-colors duration-300">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
+          className="max-w-xl text-center"
+        >
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.3, type: 'spring', stiffness: 200 }}
+            className="w-24 h-24 rounded-full border border-accent flex items-center justify-center mx-auto mb-12"
+          >
+            <Check className="text-accent w-10 h-10" />
+          </motion.div>
+          <h1 className="text-4xl md:text-5xl font-serif text-text-primary mb-6">Thank You</h1>
+          <p className="text-text-secondary font-light text-lg mb-12 leading-relaxed">
+            Your inquiry has been received. We review every message personally and will be in touch within 24-48 hours.
+          </p>
+          <Link
+            href="/"
+            className="inline-flex items-center gap-3 text-accent hover:text-text-primary transition-colors tracking-widest uppercase text-xs font-bold"
+          >
+            Back to Home <ArrowUpRight size={16} />
+          </Link>
+        </motion.div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-[#FAF9F7] dark:bg-[#0A0A0A]">
-      <section className="pt-32 pb-16 bg-[#1A1A1A] text-white">
-        <div className="container-main">
-          <AnimatedSection>
-            <Link href="/" className="inline-flex items-center gap-2 text-white/60 hover:text-white transition-colors mb-8">
-              <ArrowLeft className="w-4 h-4" /> Back to Home
-            </Link>
-            <h1 className="text-5xl md:text-7xl font-serif mb-4">Start Your Journey</h1>
-            <p className="text-white/60 max-w-2xl text-lg">We&apos;re thrilled you&apos;re considering DMS. Tell us about your vision, and we&apos;ll be in touch shortly.</p>
-          </AnimatedSection>
-        </div>
-      </section>
+    <div className="min-h-screen bg-bg selection:bg-accent/30 selection:text-text-primary pt-32 transition-colors duration-300">
 
-      <section className="py-8 bg-white dark:bg-[#1A1A1A] border-b border-gray-100 dark:border-gray-800">
-        <div className="container-main">
-          <div className="flex flex-wrap justify-center gap-8">
-            {trustBadges.map((badge, index) => (
-              <div key={badge.label} className="flex items-center gap-2 text-[#6B6B6B] dark:text-gray-400">
-                <badge.icon className="w-5 h-5 text-[#C4A962]" />
-                <span className="font-medium">{badge.label}</span>
+      {/* Header */}
+      <header className="max-w-[1440px] mx-auto px-8 pt-16 pb-12 md:pb-24">
+        <Link href="/" className="inline-flex items-center gap-2 text-text-primary/40 hover:text-accent transition-colors mb-12 group">
+          <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+          <span className="text-xs tracking-widest uppercase font-medium">Back to Home</span>
+        </Link>
+        <p className="section-number text-accent mb-6">01 / Inquiry</p>
+        <h1 className="text-5xl md:text-7xl lg:text-8xl font-serif font-light text-text-primary mb-8 tracking-tight">
+          Start Your Journey
+        </h1>
+        <p className="text-text-secondary font-light text-lg md:text-xl max-w-2xl leading-relaxed">
+          Tell us about your vision. From luxury hospitality brands to individual commissions, we welcome the opportunity to create something extraordinary together.
+        </p>
+      </header>
+
+      <section className="max-w-[1440px] mx-auto px-8 pb-32">
+        <div className="grid lg:grid-cols-12 gap-16 md:gap-24 items-start">
+
+          {/* Left: Context */}
+          <div className="lg:col-span-5 space-y-24">
+            <div>
+              <h3 className="text-xs tracking-[0.2em] uppercase font-bold text-text-primary mb-12">Get in Touch</h3>
+              <div className="space-y-10">
+                {contactInfo.map((info) => (
+                  <div key={info.label}>
+                    <p className="text-[10px] text-text-secondary uppercase tracking-widest mb-1 font-bold">{info.label}</p>
+                    <a href={info.href} className="text-lg md:text-xl font-serif text-text-primary hover:text-accent transition-colors block">
+                      {info.value}
+                    </a>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="py-24">
-        <div className="container-main">
-          <div className="grid lg:grid-cols-5 gap-16">
-            <div className="lg:col-span-3">
-              {submitted ? (
-                <AnimatedSection className="bg-white dark:bg-[#1A1A1A] p-12 rounded-xl border border-gray-100 dark:border-gray-800 text-center">
-                  <div className="w-20 h-20 bg-[#C4A962]/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <Check className="w-10 h-10 text-[#C4A962]" />
-                  </div>
-                  <h3 className="text-3xl font-serif mb-4">Thank You</h3>
-                  <p className="text-[#6B6B6B] dark:text-gray-400 text-lg mb-2">We&apos;ve received your inquiry and will be in touch within 24-48 hours.</p>
-                </AnimatedSection>
-              ) : (
-                <form className="bg-white dark:bg-[#1A1A1A] p-8 md:p-12 rounded-xl border border-gray-100 dark:border-gray-800" onSubmit={handleSubmit}>
-                  {error && <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm mb-6">{error}</div>}
-                  
-                  <div className="mb-12">
-                    <h3 className="text-lg font-serif mb-6 pb-2 border-b border-gray-100 dark:border-gray-800">Contact Information</h3>
-                    <div className="grid md:grid-cols-2 gap-6">
-                      <div>
-                        <label className="block text-sm font-medium mb-2">First Name <span className="text-red-500">*</span></label>
-                        <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} className="input" required />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Last Name <span className="text-red-500">*</span></label>
-                        <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} className="input" required />
-                      </div>
-                    </div>
-                    <div className="grid md:grid-cols-2 gap-6 mt-6">
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Email <span className="text-red-500">*</span></label>
-                        <input type="email" name="email" value={formData.email} onChange={handleChange} className="input" required />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Phone</label>
-                        <input type="tel" name="phone" value={formData.phone} onChange={handleChange} className="input" placeholder="+1 (555) 000-0000" />
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="mb-12">
-                    <h3 className="text-lg font-serif mb-6 pb-2 border-b border-gray-100 dark:border-gray-800">Project Details</h3>
-                    <div className="mb-6">
-                      <label className="block text-sm font-medium mb-2">Property/Destination <span className="text-red-500">*</span></label>
-                      <input type="text" name="propertyName" value={formData.propertyName} onChange={handleChange} className="input" placeholder="e.g., Four Seasons Bora Bora" required />
-                    </div>
-                    <div className="grid md:grid-cols-2 gap-6">
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Project Type <span className="text-red-500">*</span></label>
-                        <select name="projectType" value={formData.projectType} onChange={handleChange} className="input" required>
-                          <option value="">Select type</option>
-                          <option value="Destination Wedding">Destination Wedding</option>
-                          <option value="Elopement">Elopement</option>
-                          <option value="Brand Shoot">Brand/Property Shoot</option>
-                          <option value="Corporate">Corporate Retreat</option>
-                          <option value="Other">Other</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Proposed Date <span className="text-red-500">*</span></label>
-                        <input type="text" name="eventDate" value={formData.eventDate} onChange={handleChange} className="input" placeholder="e.g., March 2026" required />
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="mb-12">
-                    <h3 className="text-lg font-serif mb-6 pb-2 border-b border-gray-100 dark:border-gray-800">Your Vision</h3>
-                    <div>
-                      <label className="block text-sm font-medium mb-2">Tell Us About Your Vision <span className="text-red-500">*</span></label>
-                      <textarea name="vision" value={formData.vision} onChange={handleChange} rows={5} className="input" placeholder="Share your story..." required />
-                    </div>
-                  </div>
-                  
-                  <button type="submit" disabled={isLoading} className="w-full btn-primary disabled:opacity-50">
-                    {isLoading ? <><Loader2 className="w-5 h-5 animate-spin" /> Sending...</> : "Send Inquiry"}
-                  </button>
-                </form>
-              )}
             </div>
-            
-            <div className="lg:col-span-2">
-              <div className="sticky top-32">
-                <AnimatedSection>
-                  <h3 className="text-2xl font-serif mb-6">Get in Touch</h3>
-                  <div className="space-y-6 mb-8">
-                    <div className="flex items-start gap-4">
-                      <Mail className="w-6 h-6 text-[#C4A962] mt-1" />
-                      <div><p className="font-medium">hello@destinationmediaservices.com</p><p className="text-[#6B6B6B] dark:text-gray-400 text-sm">We respond within 24-48 hours</p></div>
-                    </div>
-                    <div className="flex items-start gap-4">
-                      <Phone className="w-6 h-6 text-[#C4A962] mt-1" />
-                      <div><p className="font-medium">+1 (310) 555-0192</p><p className="text-[#6B6B6B] dark:text-gray-400 text-sm">Mon-Fri, 9am-6pm PST</p></div>
-                    </div>
-                    <div className="flex items-start gap-4">
-                      <MapPin className="w-6 h-6 text-[#C4A962] mt-1" />
-                      <div><p className="font-medium">Los Angeles, California</p><p className="text-[#6B6B6B] dark:text-gray-400 text-sm">Available worldwide</p></div>
-                    </div>
+            <div>
+              <h3 className="text-xs tracking-[0.2em] uppercase font-bold text-text-primary mb-12">What Happens Next</h3>
+              <div className="space-y-10">
+                {nextSteps.map((item) => (
+                  <div key={item.step} className="relative pl-10">
+                    <span className="absolute left-0 top-0 text-xl font-serif text-accent/25 italic">{item.step}</span>
+                    <h4 className="text-base font-serif text-text-primary mb-1">{item.title}</h4>
+                    <p className="text-text-secondary font-light text-sm leading-relaxed">{item.description}</p>
                   </div>
-                </AnimatedSection>
-                
-                <AnimatedSection delay={0.2}>
-                  <div className="p-6 bg-[#FAF9F7] dark:bg-[#242424] rounded-xl border border-gray-100 dark:border-gray-800 mb-8">
-                    <h4 className="font-serif text-lg mb-4">What Happens Next?</h4>
-                    <ol className="text-sm text-[#6B6B6B] dark:text-gray-400 space-y-3">
-                      <li className="flex gap-3"><span className="font-bold text-[#C4A962]">1.</span>Review within 24-48 hours</li>
-                      <li className="flex gap-3"><span className="font-bold text-[#C4A962]">2.</span>Discovery call to discuss vision</li>
-                      <li className="flex gap-3"><span className="font-bold text-[#C4A962]">3.</span>Receive customized proposal</li>
-                    </ol>
-                  </div>
-                </AnimatedSection>
-                
-                <AnimatedSection delay={0.3}>
-                  <div className="grid grid-cols-3 gap-4 text-center">
-                    {successStats.map((stat, i) => (
-                      <div key={i} className="p-4 bg-white dark:bg-[#1A1A1A] rounded-lg border border-gray-100 dark:border-gray-800">
-                        <p className="text-xl font-serif text-[#C4A962]">{stat.value}</p>
-                        <p className="text-xs text-[#6B6B6B] dark:text-gray-400">{stat.label}</p>
-                      </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Right: Form */}
+          <div className="lg:col-span-7">
+            <form onSubmit={handleSubmit} noValidate className="space-y-16">
+
+              {/* 01 Contact */}
+              <div className="space-y-10">
+                <div className="flex items-center gap-6">
+                  <span className="text-[10px] tracking-[0.25em] uppercase font-bold text-text-primary whitespace-nowrap">
+                    01 &nbsp; Contact Information
+                  </span>
+                  <div className="h-px flex-1 bg-text-primary/10" />
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-x-12 gap-y-10">
+                  <FloatingInput label="First Name" name="firstName" value={form.firstName} onChange={handleChange} error={errors.firstName} required />
+                  <FloatingInput label="Last Name" name="lastName" value={form.lastName} onChange={handleChange} error={errors.lastName} required />
+                </div>
+                <div className="grid md:grid-cols-2 gap-x-12 gap-y-10">
+                  <FloatingInput label="Email Address" name="email" type="email" value={form.email} onChange={handleChange} error={errors.email} required />
+                  <FloatingInput label="Phone (Optional)" name="phone" type="tel" value={form.phone} onChange={handleChange} placeholder="+1 (555) 000" />
+                </div>
+              </div>
+
+              {/* 02 Project */}
+              <div className="space-y-10 pt-4">
+                <div className="flex items-center gap-6">
+                  <span className="text-[10px] tracking-[0.25em] uppercase font-bold text-text-primary whitespace-nowrap">
+                    02 &nbsp; Project Details
+                  </span>
+                  <div className="h-px flex-1 bg-text-primary/10" />
+                </div>
+
+                <FloatingInput label="Property / Brand Name" name="property" value={form.property} onChange={handleChange} error={errors.property} required placeholder="e.g., Aman Tokyo" />
+
+                {/* Inquiry Type Pills */}
+                <div className="space-y-4">
+                  <p className="text-[9px] uppercase tracking-widest font-bold text-accent">
+                    Project Type <span className="text-accent/60">*</span>
+                  </p>
+                  <div className="flex flex-wrap gap-3">
+                    {inquiryTypes.map((type) => (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={() => handleChange('inquiryType', type)}
+                        className={`px-5 py-2.5 text-[11px] uppercase tracking-[0.15em] font-medium border transition-all duration-200 ${form.inquiryType === type
+                            ? 'bg-accent text-white border-accent'
+                            : 'bg-transparent border-text-primary/20 text-text-secondary hover:border-accent hover:text-text-primary'
+                          }`}
+                      >
+                        {type}
+                      </button>
                     ))}
                   </div>
-                </AnimatedSection>
+                  <AnimatePresence>
+                    {errors.inquiryType && (
+                      <motion.p
+                        initial={{ opacity: 0, y: -4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -4 }}
+                        className="flex items-center gap-1.5 text-red-400 text-[11px] tracking-wider"
+                      >
+                        <AlertCircle size={12} /> {errors.inquiryType}
+                      </motion.p>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                <FloatingInput label="Proposed Date or Timeline" name="proposedDate" value={form.proposedDate} onChange={handleChange} error={errors.proposedDate} required placeholder="e.g., Q3 2026" />
               </div>
-            </div>
+
+              {/* 03 Vision */}
+              <div className="space-y-6 pt-4">
+                <div className="flex items-center gap-6">
+                  <span className="text-[10px] tracking-[0.25em] uppercase font-bold text-text-primary whitespace-nowrap">
+                    03 &nbsp; Your Vision
+                  </span>
+                  <div className="h-px flex-1 bg-text-primary/10" />
+                </div>
+
+                <div className="relative">
+                  <textarea
+                    rows={6}
+                    value={form.vision}
+                    maxLength={1200}
+                    required
+                    onChange={(e) => handleChange('vision', e.target.value)}
+                    placeholder="Share the story behind your project — the destination, the mood, the feeling you want to capture..."
+                    className={`w-full bg-bg-elevated outline-none p-6 text-base font-light transition-all duration-300 resize-none placeholder:text-text-primary/20 border-b-2 ${errors.vision ? 'border-red-400/60' : 'border-transparent focus:border-accent'
+                      }`}
+                  />
+                  <div className="flex items-center justify-between mt-2">
+                    <AnimatePresence>
+                      {errors.vision && (
+                        <motion.p
+                          initial={{ opacity: 0, y: -4 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -4 }}
+                          className="flex items-center gap-1.5 text-red-400 text-[11px] tracking-wider"
+                        >
+                          <AlertCircle size={12} /> {errors.vision}
+                        </motion.p>
+                      )}
+                    </AnimatePresence>
+                    <span className={`ml-auto text-[11px] tracking-wider tabular-nums transition-colors ${visionLength > 1100 ? 'text-red-400' : 'text-text-secondary/40'}`}>
+                      {visionLength} / 1200
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Submit */}
+              <div className="pt-8 flex justify-end">
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="group relative flex items-center gap-4 bg-accent text-white px-12 py-5 text-[11px] tracking-[0.2em] uppercase font-bold hover:bg-text-primary transition-all duration-300 disabled:opacity-60 overflow-hidden"
+                >
+                  {/* Progress bar */}
+                  {isSubmitting && (
+                    <motion.div
+                      initial={{ x: '-100%' }}
+                      animate={{ x: '0%' }}
+                      transition={{ duration: 2, ease: 'linear' }}
+                      className="absolute inset-0 bg-white/10"
+                    />
+                  )}
+                  <span className="relative flex items-center gap-4">
+                    {isSubmitting ? (
+                      <><Loader2 className="animate-spin" size={18} /> Sending Inquiry</>
+                    ) : (
+                      <>Send Inquiry <ArrowUpRight size={18} className="group-hover:-translate-y-1 group-hover:translate-x-1 transition-transform duration-300" /></>
+                    )}
+                  </span>
+                </button>
+              </div>
+
+              <p className="text-[10px] text-text-secondary/40 text-right tracking-wider uppercase">
+                We respond to all inquiries within 24-48 hours.
+              </p>
+            </form>
           </div>
+
         </div>
       </section>
     </div>

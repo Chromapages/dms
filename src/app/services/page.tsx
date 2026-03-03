@@ -1,158 +1,221 @@
-"use client";
+'use client';
 
-import { useRef } from "react";
-import Link from "next/link";
-import { ArrowLeft, ArrowRight, Camera, Video, BookOpen, Award, CheckCircle, Star, Shield, Users } from "lucide-react";
-import { motion, useInView } from "framer-motion";
-import { FadeIn, StaggerContainer, StaggerItem } from "@/components/Animations";
+import { motion } from 'framer-motion';
+import Image from 'next/image';
+import Link from 'next/link';
+import { ArrowUpRight, Camera, Video, BookOpen, Award, CheckCircle } from 'lucide-react';
 
 const services = [
-  { id: "photography", icon: Camera, title: "Photography", tagline: "Editorial-quality imagery", description: "We capture the spirit of your property through editorial-quality imagery. From sweeping architectural shots to the subtle play of light across a dining terrace, our photographs invite viewers to feel the experience—before they arrive.", deliverables: ["Full property documentation", "Editorial-style portraits", "Architectural detail shots", "Lifestyle imagery", "High-resolution delivery", "Online gallery"] },
-  { id: "videography", icon: Video, title: "Videography", tagline: "Cinematic storytelling", description: "Motion brings stories to life. Our cinematic films capture the rhythm and romance of your destination, creating immersive content that connects with guests on an emotional level.", deliverables: ["Brand films (2-5 min)", "Social media content", "Drone footage", "Behind-the-scenes", "Custom music", "Multi-format delivery"] },
-  { id: "branding", icon: BookOpen, title: "Brand Storytelling", tagline: "Cohesive visual narratives", description: "Great visuals deserve great context. We help hospitality brands craft cohesive visual narratives that align with their positioning and resonate with their audience.", deliverables: ["Brand strategy", "Visual identity", "Content strategy", "Style guides", "Channel planning", "Ongoing support"] },
-  { id: "commercial", icon: Award, title: "Commercial", tagline: "Elevated commercial imagery", description: "Whether for brochures, campaigns, or digital platforms, we create elevated commercial imagery that showcases your destination's unique character and drives bookings.", deliverables: ["Campaign imagery", "Print & digital ads", "Website content", "Brochure photography", "Trade show materials", "Usage licensing"] },
+  {
+    id: "01",
+    title: "Photography",
+    tagline: "Editorial-quality imagery",
+    description: "We capture the spirit of your property through editorial-quality imagery. From sweeping architectural shots to the subtle play of light across a dining terrace, our photographs invite viewers to feel the experience—before they arrive.",
+    deliverables: ["Full property documentation", "Editorial-style portraits", "Architectural detail shots", "Lifestyle imagery", "High-resolution delivery", "Online gallery"],
+    image: "/hero-dms.png"
+  },
+  {
+    id: "02",
+    title: "Videography",
+    tagline: "Cinematic storytelling",
+    description: "Motion brings stories to life. Our cinematic films capture the rhythm and romance of your destination, creating immersive content that connects with guests on an emotional level.",
+    deliverables: ["Brand films (2-5 min)", "Social media content", "Drone footage", "Behind-the-scenes", "Custom music", "Multi-format delivery"],
+    image: "/hero-dms.png"
+  },
+  {
+    id: "03",
+    title: "Brand Storytelling",
+    tagline: "Cohesive visual narratives",
+    description: "Great visuals deserve great context. We help hospitality brands craft cohesive visual narratives that align with their positioning and resonate with their audience.",
+    deliverables: ["Brand strategy", "Visual identity", "Content strategy", "Style guides", "Channel planning", "Ongoing support"],
+    image: "/hero-dms.png"
+  },
+  {
+    id: "04",
+    title: "Commercial",
+    tagline: "Elevated commercial imagery",
+    description: "Whether for brochures, campaigns, or digital platforms, we create elevated commercial imagery that showcases your destination's unique character and drives bookings.",
+    deliverables: ["Campaign imagery", "Print & digital ads", "Website content", "Brochure photography", "Trade show materials", "Usage licensing"],
+    image: "/hero-dms.png"
+  },
 ];
 
-const process = [
-  { step: 1, title: "Discover", description: "We learn about your brand, vision, and goals through an in-depth consultation." },
-  { step: 2, title: "Strategy", description: "We develop a customized creative approach tailored to your specific needs." },
-  { step: 3, title: "Create", description: "Our team executes the shoot with meticulous attention to every detail." },
-  { step: 4, title: "Deliver", description: "You receive professionally edited images and a finished product that exceeds expectations." },
+const processSteps = [
+  { step: "01", title: "Discover", description: "We learn about your brand, vision, and goals through an in-depth consultation." },
+  { step: "02", title: "Strategy", description: "We develop a customized creative approach tailored to your specific needs." },
+  { step: "03", title: "Create", description: "Our team executes the shoot with meticulous attention to every detail." },
+  { step: "04", title: "Deliver", description: "You receive professionally edited images and a finished product that exceeds expectations." },
 ];
 
 const stats = [
   { value: "500+", label: "Projects Delivered" },
   { value: "98%", label: "Client Satisfaction" },
   { value: "25+", label: "Industry Awards" },
-  { value: "15+", label: "Years Combined Experience" },
+  { value: "15+", label: "Years Experience" },
 ];
 
-const trustBadges = [
-  { icon: Shield, label: "Fully Insured" },
-  { icon: Star, label: "5-Star Rated" },
-  { icon: Users, label: "500+ Happy Clients" },
-];
-
-function AnimatedSection({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-50px" });
+export default function ServicesPage() {
   return (
-    <motion.div ref={ref} initial={{ opacity: 0, y: 30 }} animate={isInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay }}>
-      {children}
-    </motion.div>
-  );
-}
+    <div className="min-h-screen bg-bg selection:bg-accent/30 selection:text-text-primary pt-32 transition-colors duration-300">
 
-export default function Services() {
-  return (
-    <>
-      <section className="pt-32 pb-16 bg-[#FAF9F7] dark:bg-[#0A0A0A]">
-        <div className="container-main">
-          <AnimatedSection>
-            <Link href="/" className="inline-flex items-center gap-2 text-[#6B6B6B] hover:text-[#C4A962] transition-colors mb-8">
-              <ArrowLeft className="w-4 h-4" /> Back to Home
-            </Link>
-            <h1 className="text-5xl md:text-7xl font-serif mb-4">Our Services</h1>
-            <p className="text-[#6B6B6B] dark:text-gray-400 max-w-2xl text-lg">Comprehensive visual storytelling for the world&apos;s finest hospitality brands</p>
-          </AnimatedSection>
-        </div>
+      {/* Header */}
+      <header className="max-w-[1440px] mx-auto px-8 pt-16 pb-12 md:pb-24">
+        <p className="section-number text-accent mb-6 uppercase tracking-widest text-sm font-medium">
+          Our Capabilities
+        </p>
+        <h1 className="text-5xl md:text-7xl lg:text-8xl font-serif font-light text-text-primary mb-8 tracking-tight">
+          Crafting Visual Narratives
+        </h1>
+        <p className="text-text-secondary font-light text-lg md:text-xl max-w-2xl leading-relaxed">
+          Comprehensive visual storytelling for the world&apos;s finest hospitality brands. We translate the essence of luxury into cinematic experiences.
+        </p>
+      </header>
+
+      {/* Services List */}
+      <section className="space-y-32 md:space-y-48 pb-32">
+        {services.map((service, index) => (
+          <div key={service.id} className="max-w-[1440px] mx-auto px-8 grid lg:grid-cols-2 gap-16 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: index % 2 === 0 ? -30 : 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 1 }}
+              className={index % 2 === 1 ? 'lg:order-2' : ''}
+            >
+              <div className="flex items-center gap-6 mb-8">
+                <span className="text-5xl md:text-7xl font-serif text-accent/20 italic">
+                  {service.id}
+                </span>
+                <div className="h-px flex-1 bg-text-primary/10" />
+              </div>
+
+              <p className="text-accent text-sm uppercase tracking-widest font-medium mb-4">
+                {service.tagline}
+              </p>
+              <h2 className="text-4xl md:text-5xl font-serif text-text-primary mb-8 leading-tight">
+                {service.title}
+              </h2>
+              <p className="text-text-secondary text-lg font-light leading-relaxed mb-12 max-w-xl">
+                {service.description}
+              </p>
+
+              <div className="mb-12">
+                <h3 className="text-sm uppercase tracking-widest font-bold text-text-primary mb-6">
+                  Deliverables
+                </h3>
+                <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {service.deliverables.map((item, i) => (
+                    <li key={i} className="flex items-start gap-3 text-text-secondary font-light">
+                      <CheckCircle className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <Link
+                href="/inquiry"
+                className="inline-flex items-center gap-3 bg-accent text-white px-10 py-4 text-sm tracking-widest uppercase font-medium hover:bg-text-primary transition-colors duration-300"
+              >
+                Inquire Now
+                <ArrowUpRight size={18} />
+              </Link>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 1.2 }}
+              className={`relative aspect-[16/9] md:aspect-[4/5] bg-bg-elevated overflow-hidden ${index % 2 === 1 ? 'lg:order-1' : ''}`}
+            >
+              <Image
+                src={service.image}
+                alt={service.title}
+                fill
+                className="object-cover grayscale-[20%] hover:grayscale-0 transition-all duration-700"
+                sizes="(max-width: 768px) 100vw, 50vw"
+              />
+              <div className="absolute inset-0 bg-black/5" />
+            </motion.div>
+          </div>
+        ))}
       </section>
 
-      <section className="py-8 bg-white dark:bg-[#1A1A1A] border-b border-gray-100 dark:border-gray-800">
-        <div className="container-main">
-          <div className="flex flex-wrap justify-center gap-8">
-            {trustBadges.map((badge, index) => (
-              <div key={badge.label} className="flex items-center gap-2 text-[#6B6B6B] dark:text-gray-400">
-                <badge.icon className="w-5 h-5 text-[#C4A962]" />
-                <span className="font-medium">{badge.label}</span>
+      {/* Process Section */}
+      <section className="bg-bg-elevated py-32 md:py-48 transition-colors duration-300">
+        <div className="max-w-[1440px] mx-auto px-8">
+          <div className="text-center mb-24 md:mb-32">
+            <p className="section-number text-accent mb-6">02 / Methodology</p>
+            <h2 className="text-4xl md:text-6xl font-serif text-text-primary mb-8">
+              Our Creative Process
+            </h2>
+            <p className="text-text-secondary font-light max-w-xl mx-auto">
+              A collaborative and structured approach designed to ensure every story reflects the unique identity of your brand.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 md:gap-16">
+            {processSteps.map((step) => (
+              <div key={step.step} className="group relative">
+                <span className="text-7xl font-serif text-accent/10 absolute -top-8 -left-4 italic select-none">
+                  {step.step}
+                </span>
+                <div className="relative z-10">
+                  <h3 className="text-xl font-serif text-text-primary mb-4 group-hover:text-accent transition-colors">
+                    {step.title}
+                  </h3>
+                  <p className="text-text-secondary font-light leading-relaxed">
+                    {step.description}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {services.map((service, index) => (
-        <section key={service.id} className={`py-24 ${index % 2 === 1 ? "bg-white dark:bg-[#1A1A1A]" : ""}`}>
-          <div className="container-main">
-            <div className={`grid lg:grid-cols-2 gap-16 items-center ${index % 2 === 1 ? "lg:flex-row-reverse" : ""}`}>
-              <AnimatedSection className={index % 2 === 1 ? "lg:order-2" : ""}>
-                <div className="flex items-center gap-3 text-[#C4A962] mb-4">
-                  <service.icon className="w-6 h-6" />
-                  <span className="text-sm font-medium uppercase tracking-wider">{service.tagline}</span>
-                </div>
-                <h2 className="text-4xl md:text-5xl font-serif mb-6">{service.title}</h2>
-                <p className="text-[#6B6B6B] dark:text-gray-400 text-lg leading-relaxed mb-8">{service.description}</p>
-                <div className="mb-8">
-                  <h3 className="font-medium mb-4">What&apos;s Included:</h3>
-                  <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {service.deliverables.map((item, i) => (
-                      <li key={i} className="flex items-center gap-2 text-[#6B6B6B] dark:text-gray-400">
-                        <CheckCircle className="w-4 h-4 text-[#C4A962] flex-shrink-0" />
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <Link href="/inquiry" className="btn-primary">Request Quote <ArrowRight className="w-4 h-4" /></Link>
-              </AnimatedSection>
-              <AnimatedSection delay={0.2} className={index % 2 === 1 ? "lg:order-1" : ""}>
-                <div className="aspect-[4/5] rounded-lg overflow-hidden img-zoom">
-                  <div className="w-full h-full bg-[#E8E4DC] dark:bg-gray-800 flex items-center justify-center">
-                    <p className="text-[#6B6B6B]/50">{service.title} Image</p>
-                  </div>
-                </div>
-              </AnimatedSection>
-            </div>
-          </div>
-        </section>
-      ))}
-
-      <section className="py-24 bg-[#1A1A1A] text-white">
-        <div className="container-main">
-          <AnimatedSection className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-serif mb-4">Our Process</h2>
-            <p className="text-white/60 max-w-2xl mx-auto">A proven methodology that delivers exceptional results, every time</p>
-          </AnimatedSection>
-          <StaggerContainer className="grid md:grid-cols-4 gap-8">
-            {process.map((step, index) => (
-              <StaggerItem key={step.step}>
-                <div className="relative">
-                  <div className="text-6xl font-serif text-[#C4A962]/20 mb-4">{step.step}</div>
-                  <h3 className="text-xl font-serif mb-2">{step.title}</h3>
-                  <p className="text-white/60 text-sm">{step.description}</p>
-                </div>
-              </StaggerItem>
-            ))}
-          </StaggerContainer>
-        </div>
-      </section>
-
-      <section className="py-16 bg-white dark:bg-[#1A1A1A]">
-        <div className="container-main">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map((stat, index) => (
-              <AnimatedSection key={stat.label} delay={index * 0.1}>
-                <div className="text-center">
-                  <p className="text-3xl md:text-4xl font-serif text-[#C4A962]">{stat.value}</p>
-                  <p className="text-[#6B6B6B] dark:text-gray-400 text-sm">{stat.label}</p>
-                </div>
-              </AnimatedSection>
+      {/* Stats Section */}
+      <section className="py-24 md:py-32 border-b border-text-primary/5">
+        <div className="max-w-[1440px] mx-auto px-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-12 text-center">
+            {stats.map((stat, i) => (
+              <motion.div
+                key={stat.label}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1, duration: 0.8 }}
+              >
+                <p className="text-4xl md:text-6xl font-serif text-text-primary mb-4 italic">
+                  {stat.value}
+                </p>
+                <p className="text-text-secondary text-xs uppercase tracking-widest font-medium">
+                  {stat.label}
+                </p>
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="py-24 bg-[#C4A962]">
-        <div className="container-main">
-          <AnimatedSection className="text-center max-w-2xl mx-auto">
-            <h2 className="text-4xl md:text-5xl font-serif text-white mb-4">Ready to Create Something Beautiful?</h2>
-            <p className="text-white/80 mb-8">Let&apos;s discuss your project and bring your vision to life.</p>
-            <Link href="/inquiry" className="inline-flex items-center gap-2 bg-white text-[#1A1A1A] px-8 py-4 rounded-full font-medium hover:bg-[#1A1A1A] hover:text-white transition-colors">
-              Start Your Project <ArrowRight className="w-4 h-4" />
-            </Link>
-          </AnimatedSection>
+      {/* Final CTA */}
+      <section className="py-32 md:py-48 bg-bg transition-colors duration-300">
+        <div className="max-w-[1440px] mx-auto px-8 text-center">
+          <p className="section-number text-accent mb-6">Start Your Journey</p>
+          <h2 className="text-4xl md:text-7xl font-serif font-light text-text-primary mb-12">
+            Ready to tell your story?
+          </h2>
+          <Link
+            href="/inquiry"
+            className="inline-flex items-center gap-3 bg-accent text-white px-12 py-5 text-sm tracking-widest uppercase font-medium hover:bg-text-primary transition-colors duration-300"
+          >
+            Request a Consultation
+            <ArrowUpRight size={20} />
+          </Link>
         </div>
       </section>
-    </>
+
+    </div>
   );
 }
