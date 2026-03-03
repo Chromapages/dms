@@ -3,9 +3,8 @@
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
-import { Home, Camera, Globe, BookOpen, Mail, Sun, Moon } from 'lucide-react';
+import { Home, Camera, Globe, BookOpen, Mail } from 'lucide-react';
 
 // ─── Nav Items ────────────────────────────────────────────────────────────────
 
@@ -21,7 +20,6 @@ const navItems = [
 
 export default function MobileBottomNav() {
     const pathname = usePathname();
-    const { theme, setTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
@@ -29,10 +27,6 @@ export default function MobileBottomNav() {
     }, []);
 
     if (!mounted) return null;
-
-    const isDark = theme === 'dark';
-
-    const handleToggleTheme = () => setTheme(isDark ? 'light' : 'dark');
 
     const isActive = (href: string) =>
         href === '/' ? pathname === '/' : pathname.startsWith(href);
@@ -104,44 +98,6 @@ export default function MobileBottomNav() {
                             </li>
                         );
                     })}
-
-                    {/* Divider */}
-                    <li className="flex items-center" aria-hidden="true">
-                        <span className="w-px h-6 bg-text-primary/10" />
-                    </li>
-
-                    {/* Theme toggle */}
-                    <li className="flex items-center justify-center w-14">
-                        <button
-                            onClick={handleToggleTheme}
-                            aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-                            className="w-9 h-9 rounded-full flex items-center justify-center transition-colors duration-200 hover:bg-text-primary/10 active:scale-90"
-                        >
-                            <AnimatePresence mode="wait">
-                                {isDark ? (
-                                    <motion.span
-                                        key="sun"
-                                        initial={{ rotate: -90, opacity: 0 }}
-                                        animate={{ rotate: 0, opacity: 1 }}
-                                        exit={{ rotate: 90, opacity: 0 }}
-                                        transition={{ duration: 0.2 }}
-                                    >
-                                        <Sun size={18} className="text-accent" aria-hidden="true" />
-                                    </motion.span>
-                                ) : (
-                                    <motion.span
-                                        key="moon"
-                                        initial={{ rotate: 90, opacity: 0 }}
-                                        animate={{ rotate: 0, opacity: 1 }}
-                                        exit={{ rotate: -90, opacity: 0 }}
-                                        transition={{ duration: 0.2 }}
-                                    >
-                                        <Moon size={18} className="text-text-secondary" aria-hidden="true" />
-                                    </motion.span>
-                                )}
-                            </AnimatePresence>
-                        </button>
-                    </li>
 
                 </ul>
             </div>
