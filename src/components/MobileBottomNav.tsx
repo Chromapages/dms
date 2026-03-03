@@ -38,7 +38,7 @@ export default function MobileBottomNav() {
             style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
         >
             {/* Glass bar */}
-            <div className="bg-bg/85 backdrop-blur-2xl border-t border-text-primary/[0.08] transition-colors duration-300">
+            <div className="bg-[var(--bg)] border-t border-text-primary/[0.08] transition-colors duration-300">
                 <ul className="flex items-stretch h-16" role="list">
 
                     {/* Nav items */}

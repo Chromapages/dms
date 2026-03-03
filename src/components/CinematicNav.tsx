@@ -31,8 +31,8 @@ export default function CinematicNav() {
     >
       <div className="max-w-[1440px] mx-auto px-8 flex items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="relative z-50">
-          <span className="font-serif text-sm tracking-widest transition-colors text-text-primary">
+        <Link href="/" className="relative z-50 group">
+          <span className="font-serif text-sm tracking-widest transition-colors text-text-primary group-hover:text-accent">
             Destination Media Services
           </span>
         </Link>
@@ -45,19 +45,21 @@ export default function CinematicNav() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="label text-white hover:text-white transition-colors relative group"
+                className="label text-text-primary hover:text-accent transition-colors relative group"
               >
                 {item.label}
-                <span className="absolute -bottom-1 left-0 w-0 h-px bg-[#C4A962] transition-all duration-300 group-hover:w-full" />
+                <span className="absolute -bottom-1 left-0 w-0 h-px bg-accent transition-all duration-300 group-hover:w-full" />
               </Link>
             ))}
-            <Link href="/inquiry" className="btn-ghost text-white border-white/30 hover:border-[#C4A962]">
+            <Link href="/inquiry" className="btn-ghost border-text-primary/30 hover:border-accent">
               Contact
             </Link>
           </div>
 
           {/* Theme Toggle — Visible on all screens */}
-          <DarkModeToggle />
+          <div className="relative z-50">
+            <DarkModeToggle />
+          </div>
         </div>
       </div>
     </nav>
