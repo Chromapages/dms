@@ -35,6 +35,15 @@
   --font-size-body: clamp(16px, 1.5vw, 18px);
   --font-size-caption: 13px;
   --font-size-label: 11px;
+
+  /* Semantic Color Mappings */
+  --color-bg: var(--bg);
+  --color-bg-surface: var(--bg-surface);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-accent: var(--accent);
 }
 
 :root {
